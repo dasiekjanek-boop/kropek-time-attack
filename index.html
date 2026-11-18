@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="pl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kropek Rally Team Time Attack – nowy adres</title>
+<link rel="canonical" href="https://kropekrallyteam.github.io/">
+<link rel="icon" type="image/png" href="https://kropekrallyteam.github.io/favicon.png">
+<style>
+  :root{--tlo:#101018;--tekst:#e8e4da;--akcent:#ffd21f}
+  body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--tlo);color:var(--tekst);font-family:system-ui,sans-serif;text-align:center;padding:16px;box-sizing:border-box}
+  a{color:var(--akcent)}
+</style>
+</head><body>
+<div>
+  <h1>Gra przeniesiona</h1>
+  <p>Przekierowuję na nowy adres: <a id="link" href="https://kropekrallyteam.github.io/">kropekrallyteam.github.io</a></p>
+</div>
+<script>
+// Stary adres gry (dasiekjanek-boop.github.io/kropek-time-attack) → nowy (kropekrallyteam.github.io).
+// Dane gracza z tej przeglądarki przechodzą na nowy adres: ustawienia i duch (bez tajemnic) oraz jednorazowy bilet na konto
+// (ważny 10 min, wydaje go skrypt Google) – w adresie nigdy nie ma tajnego kodu ani klucza gracza.
+const NOWY = 'https://kropekrallyteam.github.io/';
+const POSREDNIK = 'https://script.google.com/macros/s/AKfycbx5zg-Thl1rRqM4sXZ3-yBfzdcR_c5c_2Nllxh7w32uAqAk7MohyhAKyuTYW7roGF8/exec';
+(async () => {
+  let cel = NOWY;
+  try {
+    const ls = localStorage, lokalne = {};
+    for (const k of ['krt_auto', 'krt_rozdz', 'krt_duch_wl', 'krt_best_janusz', 'krt_best_andrzej', 'krt_duch_janusz', 'krt_duch_andrzej']) {
+      const v = ls.getItem(k); if (v !== null) lokalne[k] = v;
+    }
+    let token = '';
+    const kod = ls.getItem('krt_kod'), nick = ls.getItem('krt_nick');
+    if (kod && nick) {
+      try {
+        const o = await Promise.race([
+          fetch(POSREDNIK, {method: 'POST', body: JSON.stringify({akcja: 'przenies_start', kod})}).then(r => r.json()),
+          new Promise((_, nie) => setTimeout(nie, 8000))
+        ]);
+        if (o && o.ok) token = o.token;
+      } catch (e) {}
+    }
+    if (token || Object.keys(lokalne).length) {
+      const dane = btoa(unescape(encodeURIComponent(JSON.stringify({t: token, l: lokalne}))));
+      cel = NOWY + '#przenies=' + encodeURIComponent(dane);
+    }
+  } catch (e) {}
+  location.replace(cel);
+})();
+</script>
+</body></html>
